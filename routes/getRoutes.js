@@ -1,214 +1,486 @@
 const express = require('express');
 const router = express.Router();
-const { executeQuery } = require('../helpers');  // Import the helper function
+const db = require('../config/database');
 
-// Users
+// GET all records and GET by ID endpoints for each table
+
+// 'users' table
 router.get('/users', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM users WHERE Deleted = FALSE');
-        if (!rows || rows.length === 0) {
-            return res.status(404).json({ message: 'No users found' });
-        }
+        const query = `SELECT * FROM users WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching users', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/users/:user_id', async (req, res) => {
-    const { user_id } = req.params;
+router.get('/users/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM users WHERE user_id = ? AND Deleted = FALSE', [user_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM users WHERE user_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'User not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching user', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// User Contacts
+// 'user_contacts' table
 router.get('/user_contacts', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM user_contacts WHERE Deleted = FALSE');
+        const query = `SELECT * FROM user_contacts WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching user contacts', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/user_contacts/:contact_id', async (req, res) => {
-    const { contact_id } = req.params;
+router.get('/user_contacts/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM user_contacts WHERE contact_id = ? AND Deleted = FALSE', [contact_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Contact not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM user_contacts WHERE contact_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Contact not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching contact', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// User Profiles
+// 'user_profiles' table
 router.get('/user_profiles', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM user_profiles WHERE Deleted = FALSE');
+        const query = `SELECT * FROM user_profiles WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching user profiles', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/user_profiles/:profile_id', async (req, res) => {
-    const { profile_id } = req.params;
+router.get('/user_profiles/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM user_profiles WHERE profile_id = ? AND Deleted = FALSE', [profile_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Profile not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM user_profiles WHERE profile_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Profile not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching profile', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// Companies
+// 'companies' table
 router.get('/companies', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM companies WHERE Deleted = FALSE');
+        const query = `SELECT * FROM companies WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching companies', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/companies/:company_id', async (req, res) => {
-    const { company_id } = req.params;
+router.get('/companies/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM companies WHERE company_id = ? AND Deleted = FALSE', [company_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Company not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM companies WHERE company_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Company not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching company', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// Company Details
+// 'company_details' table
 router.get('/company_details', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM company_details WHERE Deleted = FALSE');
+        const query = `SELECT * FROM company_details WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching company details', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/company_details/:details_id', async (req, res) => {
-    const { details_id } = req.params;
+router.get('/company_details/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM company_details WHERE details_id = ? AND Deleted = FALSE', [details_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Company details not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM company_details WHERE details_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Details not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching company details', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// Jobs
+// 'contacts' table
+router.get('/contacts', async (req, res) => {
+    try {
+        const query = `SELECT * FROM contacts WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/contacts/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM contacts WHERE contact_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Contact not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'jobs' table
 router.get('/jobs', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM jobs WHERE Deleted = FALSE');
+        const query = `SELECT * FROM jobs WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching jobs', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/jobs/:job_id', async (req, res) => {
-    const { job_id } = req.params;
+router.get('/jobs/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM jobs WHERE job_id = ? AND Deleted = FALSE', [job_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Job not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM jobs WHERE job_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Job not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching job', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// Applications
+// 'applications' table
 router.get('/applications', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM applications WHERE Deleted = FALSE');
+        const query = `SELECT * FROM applications WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching applications', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/applications/:application_id', async (req, res) => {
-    const { application_id } = req.params;
+router.get('/applications/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM applications WHERE application_id = ? AND Deleted = FALSE', [application_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Application not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM applications WHERE application_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Application not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching application', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// Training Programs
+// 'training_programs' table
 router.get('/training_programs', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM training_programs WHERE Deleted = FALSE');
+        const query = `SELECT * FROM training_programs WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching training programs', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
-
-router.get('/training_programs/:training_id', async (req, res) => {
-    const { training_id } = req.params;
+router.get('/training_programs/:id', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM training_programs WHERE training_id = ? AND Deleted = FALSE', [training_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Training program not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM training_programs WHERE training_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Training program not found.' }
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching training program', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-// Activity Log
+// 'training_details' table
+router.get('/training_details', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_details WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/training_details/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_details WHERE details_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Training details not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'training_logistics' table
+router.get('/training_logistics', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_logistics WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/training_logistics/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_logistics WHERE logistics_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Training logistics not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'training_content' table
+router.get('/training_content', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_content WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/training_content/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_content WHERE content_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Training content not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'training_participation' table
+router.get('/training_participation', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_participation WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/training_participation/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_participation WHERE participation_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Training participation not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'training_compliance' table
+router.get('/training_compliance', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_compliance WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/training_compliance/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM training_compliance WHERE compliance_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Training compliance not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'activity_log' table
 router.get('/activity_log', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM activity_log WHERE Deleted = FALSE');
+        const query = `SELECT * FROM activity_log WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching activity logs', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/activity_log/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM activity_log WHERE log_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Activity log not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
-router.get('/activity_log/:log_id', async (req, res) => {
-    const { log_id } = req.params;
+// 'notifications' table
+router.get('/notifications', async (req, res) => {
     try {
-        const rows = await executeQuery('SELECT * FROM activity_log WHERE log_id = ? AND Deleted = FALSE', [log_id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Activity log not found' });
-        }
-        res.status(200).json(rows[0]);
+        const query = `SELECT * FROM notifications WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching activity log', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/notifications/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM notifications WHERE notification_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Notification not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'news' table
+router.get('/news', async (req, res) => {
+    try {
+        const query = `SELECT * FROM news WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/news/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM news WHERE news_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'News not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'user_news_read' table
+router.get('/user_news_read', async (req, res) => {
+    try {
+        const query = `SELECT * FROM user_news_read WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/user_news_read/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM user_news_read WHERE user_news_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'User news read not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'interview_acceptance' table
+router.get('/interview_acceptance', async (req, res) => {
+    try {
+        const query = `SELECT * FROM interview_acceptance WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/interview_acceptance/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM interview_acceptance WHERE interview_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Interview acceptance not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// 'appointments' table
+router.get('/appointments', async (req, res) => {
+    try {
+        const query = `SELECT * FROM appointments WHERE Deleted = FALSE`;
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+router.get('/appointments/:id', async (req, res) => {
+    try {
+        const query = `SELECT * FROM appointments WHERE appointment_id = ? AND Deleted = FALSE`;
+        const [rows] = await db.execute(query, [req.params.id]);
+        res.status(rows.length > 0 ? 200 : 404).json(
+            rows.length > 0 ? rows[0] : { message: 'Appointment not found.' }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
