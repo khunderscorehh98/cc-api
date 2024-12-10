@@ -756,4 +756,34 @@ router.get('/users/:id', function (req, res) {
     });
 });
 
+// /user_contacts route (Table No. X)
+router.get('/user_contacts', function (req, res) {
+    db.query('SELECT * FROM user_contacts', function (err, result) {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+// /user_contacts/:id route (Table No. X)
+router.get('/user_contacts/:id', function (req, res) {
+    const id = req.params.id;
+    db.query('SELECT * FROM user_contacts WHERE contact_id = ?', [id], function (err, result) {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            if (result.length > 0) {
+                res.json(result);
+            } else {
+                res.status(404).send('User contact not found');
+            }
+        }
+    });
+});
+
+
 module.exports = router;
