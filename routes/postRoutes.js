@@ -309,4 +309,242 @@ router.post('/user_contacts', function(req, res) {
     });
     res.send('User contact created successfully');
 })
+
+// /users route
+router.post('/users', function (req, res) {
+    const { full_name, email, password, date_of_birth, nationality } = req.body;
+
+    const query = `INSERT INTO users (full_name, email, password, date_of_birth, nationality) VALUES (?, ?, ?, ?, ?)`;
+    const values = [full_name, email, password, date_of_birth, nationality];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'User created successfully.',
+            user_id: result.insertId
+        });
+    });
+});
+
+// /user_profiles route
+router.post('/user_profiles', function (req, res) {
+    const { user_id, profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability } = req.body;
+
+    const query = `INSERT INTO user_profiles (user_id, profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [user_id, profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'User profile created successfully.',
+            profile_id: result.insertId
+        });
+    });
+});
+
+// /activity_log route
+router.post('/activity_log', function (req, res) {
+    const { user_id, company_id, table_name, record_id, activity_type, details } = req.body;
+
+    const query = `INSERT INTO activity_log (user_id, company_id, table_name, record_id, activity_type, details) 
+                    VALUES (?, ?, ?, ?, ?, ?)`;
+    const values = [user_id, company_id, table_name, record_id, activity_type, details];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Activity logged successfully.',
+            log_id: result.insertId
+        });
+    });
+});
+
+// /user_news_read route
+router.post('/user_news_read', function (req, res) {
+    const { user_id, news_id, is_read } = req.body;
+
+    const query = `INSERT INTO user_news_read (user_id, news_id, is_read) VALUES (?, ?, ?)`;
+    const values = [user_id, news_id, is_read];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'User news read status recorded successfully.',
+            user_news_id: result.insertId
+        });
+    });
+});
+
+// /appointments route
+router.post('/appointments', function (req, res) {
+    const { user_id, appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason } = req.body;
+
+    const query = `INSERT INTO appointments (user_id, appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [user_id, appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Appointment created successfully.',
+            appointment_id: result.insertId
+        });
+    });
+});
+
+// /training_schedule route
+router.post('/training_schedule', function (req, res) {
+    const { training_id, session_date, session_start_time, session_end_time, session_topic } = req.body;
+
+    const query = `INSERT INTO training_schedule (training_id, session_date, session_start_time, session_end_time, session_topic) 
+                    VALUES (?, ?, ?, ?, ?)`;
+    const values = [training_id, session_date, session_start_time, session_end_time, session_topic];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Training schedule created successfully.',
+            schedule_id: result.insertId
+        });
+    });
+});
+
+// /training_modules route
+router.post('/training_modules', function (req, res) {
+    const { training_id, module_title, module_description, resources_link } = req.body;
+
+    const query = `INSERT INTO training_modules (training_id, module_title, module_description, resources_link) 
+                    VALUES (?, ?, ?, ?)`;
+    const values = [training_id, module_title, module_description, resources_link];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Training module created successfully.',
+            module_id: result.insertId
+        });
+    });
+});
+
+// /certifications route
+router.post('/certifications', function (req, res) {
+    const { user_id, training_id, certification_title, certification_issuer, issue_date, expiration_date } = req.body;
+
+    const query = `INSERT INTO certifications (user_id, training_id, certification_title, certification_issuer, issue_date, expiration_date) 
+                    VALUES (?, ?, ?, ?, ?, ?)`;
+    const values = [user_id, training_id, certification_title, certification_issuer, issue_date, expiration_date];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Certification recorded successfully.',
+            certification_id: result.insertId
+        });
+    });
+});
+
+// /achievements_and_awards route
+router.post('/achievements_and_awards', function (req, res) {
+    const { user_id, title, description, award_date, issuer } = req.body;
+
+    const query = `INSERT INTO achievements_and_awards (user_id, title, description, award_date, issuer) 
+                    VALUES (?, ?, ?, ?, ?)`;
+    const values = [user_id, title, description, award_date, issuer];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Achievement or award added successfully.',
+            achievement_id: result.insertId
+        });
+    });
+});
+
+// /social_media_links route
+router.post('/social_media_links', function (req, res) {
+    const { user_id, company_id, platform_name, profile_url } = req.body;
+
+    const query = `INSERT INTO social_media_links (user_id, company_id, platform_name, profile_url) 
+                    VALUES (?, ?, ?, ?)`;
+    const values = [user_id, company_id, platform_name, profile_url];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Social media link added successfully.',
+            link_id: result.insertId
+        });
+    });
+});
+
+// /promotional_material route
+router.post('/promotional_material', function (req, res) {
+    const { training_id, material_title, material_url } = req.body;
+
+    const query = `INSERT INTO promotional_material (training_id, material_title, material_url) 
+                    VALUES (?, ?, ?)`;
+    const values = [training_id, material_title, material_url];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'Promotional material added successfully.',
+            material_id: result.insertId
+        });
+    });
+});
+
+// /faq_and_policies route
+router.post('/faq_and_policies', function (req, res) {
+    const { training_id, question, answer } = req.body;
+
+    const query = `INSERT INTO faq_and_policies (training_id, question, answer) VALUES (?, ?, ?)`;
+    const values = [training_id, question, answer];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+        res.status(201).json({
+            message: 'FAQ or policy added successfully.',
+            faq_id: result.insertId
+        });
+    });
+});
+
 module.exports = router;
