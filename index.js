@@ -15,12 +15,17 @@ const putRoutes = require('./routes/putRoutes');
 const deleteRoutes = require('./routes/deleteRoutes');
 const patchRoutes = require('./routes/patchRoutes');
 
+const restoreRoutes = require('./routes/restoreRoutes');
+
 // Register route files
 app.use('/api', postRoutes);  // Handles POST for all resources
 app.use('/api', getRoutes);   // Handles GET for all resources
 app.use('/api', putRoutes);   // Handles PUT for all resources
 app.use('/api', deleteRoutes); // Handles DELETE for all resources
 app.use('/api', patchRoutes);  // Handles PATCH for all resources
+
+// Register restored routes file (optional)
+app.use('/api', restoreRoutes); // Handles RESTORE for all resources
 
 // Define a root route (optional)
 app.get('/', (req, res) => {

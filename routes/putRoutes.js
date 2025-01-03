@@ -1,347 +1,304 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const db = require('../config.js');
 
-// PUT endpoint for fully updating records in each table
+// /activity_log/:id route (PUT)
+router.put('/activity_log/:id', function (req, res) {
+    const { id } = req.params;
+    const { details } = req.body;
 
-// 'users' table
-router.put('/users/:id', async (req, res) => {
-    try {
-        const { full_name, email, password, date_of_birth, nationality } = req.body;
-        const query = `UPDATE users SET full_name = ?, email = ?, password = ?, date_of_birth = ?, nationality = ? WHERE user_id = ? AND Deleted = FALSE`;
-        const values = [full_name, email, password, date_of_birth, nationality, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'User updated successfully.' : 'User not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+    if (!details) {
+        return res.status(400).json({ error: 'Details parameter is required.' });
     }
+
+    const query = `UPDATE activity_log SET details = ? WHERE log_id = ? AND Deleted = FALSE`;
+    db.query(query, [details, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Activity log updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Activity log not found.' });
+        }
+    });
 });
 
-// 'user_contacts' table
-router.put('/user_contacts/:id', async (req, res) => {
-    try {
-        const { user_id, phone_number, location, linkedin_profile, portfolio_link, languages_spoken, work_authorization } = req.body;
-        const query = `UPDATE user_contacts SET user_id = ?, phone_number = ?, location = ?, linkedin_profile = ?, portfolio_link = ?, languages_spoken = ?, work_authorization = ? WHERE contact_id = ? AND Deleted = FALSE`;
-        const values = [user_id, phone_number, location, linkedin_profile, portfolio_link, languages_spoken, work_authorization, req.params.id];
+// /achievements_and_awards/:id route (PUT)
+router.put('/achievements_and_awards/:id', function (req, res) {
+    const { id } = req.params;
+    const { title, description, issuer } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'User contact updated successfully.' : 'Contact not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+    if (!title || !description || !issuer) {
+        return res.status(400).json({ error: 'Title, description, and issuer parameters are required.' });
     }
+
+    const query = `UPDATE achievements_and_awards SET title = ?, description = ?, issuer = ? WHERE achievement_id = ? AND Deleted = FALSE`;
+    db.query(query, [title, description, issuer, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Achievement and award updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Achievement and award not found.' });
+        }
+    });
 });
 
-// 'user_profiles' table
-router.put('/user_profiles/:id', async (req, res) => {
-    try {
-        const { user_id, profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability } = req.body;
-        const query = `UPDATE user_profiles SET user_id = ?, profile_picture = ?, resume_link = ?, experience_level = ?, skills = ?, educational_background = ?, previous_job_titles = ?, certifications = ?, preferred_job_titles = ?, employment_type = ?, desired_salary_range = ?, industry_of_interest = ?, preferred_work_location = ?, availability = ? WHERE profile_id = ? AND Deleted = FALSE`;
-        const values = [user_id, profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability, req.params.id];
+// /applications/:id route (PUT)
+router.put('/applications/:id', function (req, res) {
+    const { id } = req.params;
+    const { job_id, user_id, application_date, interview_date, status } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'User profile updated successfully.' : 'Profile not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+    if (!job_id || !user_id || !application_date || !interview_date || !status) {
+        return res.status(400).json({ error: 'All parameters are required.' });
     }
+
+    const validStatuses = ['Pending', 'Accepted', 'Rejected'];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: `Invalid status value. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    const query = `UPDATE applications SET job_id = ?, user_id = ?, application_date = ?, interview_date = ?, status = ? WHERE application_id = ? AND Deleted = FALSE`;
+    db.query(query, [job_id, user_id, application_date, interview_date, status, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Application updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Application not found.' });
+        }
+    });
 });
 
-// 'companies' table
-router.put('/companies/:id', async (req, res) => {
-    try {
-        const { company_name, email, password, contact_number, company_logo, business_registration_number, tax_identification_number, terms_of_service_accepted } = req.body;
-        const query = `UPDATE companies SET company_name = ?, email = ?, password = ?, contact_number = ?, company_logo = ?, business_registration_number = ?, tax_identification_number = ?, terms_of_service_accepted = ? WHERE company_id = ? AND Deleted = FALSE`;
-        const values = [company_name, email, password, contact_number, company_logo, business_registration_number, tax_identification_number, terms_of_service_accepted, req.params.id];
+// /appointments/:id route (PUT)
+router.put('/appointments/:id', function (req, res) {
+    const { id } = req.params;
+    const { appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Company updated successfully.' : 'Company not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+    const validStatuses = ['Pending', 'Accepted', 'Rejected'];
+    if (!appointment_type || !appointment_header || !appointment_description || !appointment_date || !appointment_time || !appointment_location || !appointment_status || !reason) {
+        return res.status(400).json({ error: 'All parameters are required.' });
     }
+
+    if (!validStatuses.includes(appointment_status)) {
+        return res.status(400).json({ error: `Invalid status value. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    const query = `UPDATE appointments SET appointment_type = ?, appointment_header = ?, appointment_description = ?, appointment_date = ?, appointment_time = ?, appointment_location = ?, appointment_status = ?, reason = ? WHERE appointment_id = ? AND Deleted = FALSE`;
+    db.query(query, [appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Appointment updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Appointment not found.' });
+        }
+    });
 });
 
-// 'company_details' table
-router.put('/company_details/:id', async (req, res) => {
-    try {
-        const { company_id, industry_type, company_size, headquarters_location, additional_office_locations, year_founded, company_website, company_description, social_media_links, company_culture_info, achievements_and_awards } = req.body;
-        const query = `UPDATE company_details SET company_id = ?, industry_type = ?, company_size = ?, headquarters_location = ?, additional_office_locations = ?, year_founded = ?, company_website = ?, company_description = ?, social_media_links = ?, company_culture_info = ?, achievements_and_awards = ? WHERE details_id = ? AND Deleted = FALSE`;
-        const values = [company_id, industry_type, company_size, headquarters_location, additional_office_locations, year_founded, company_website, company_description, social_media_links, company_culture_info, achievements_and_awards, req.params.id];
+// /certifications/:id route (PUT)
+router.put('/certifications/:id', function (req, res) {
+    const { id } = req.params;
+    const { certification_title, certification_issuer, issue_date, expiration_date } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Company details updated successfully.' : 'Details not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+    if (!certification_title || !certification_issuer || !issue_date || !expiration_date) {
+        return res.status(400).json({ error: 'All parameters are required.' });
     }
+
+    const query = `UPDATE certifications SET certification_title = ?, certification_issuer = ?, issue_date = ?, expiration_date = ? WHERE certification_id = ? AND Deleted = FALSE`;
+    db.query(query, [certification_title, certification_issuer, issue_date, expiration_date, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Certification updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Certification not found.' });
+        }
+    });
 });
 
-// 'contacts' table
-router.put('/contacts/:id', async (req, res) => {
-    try {
-        const { company_id, primary_contact_name, contact_person_job_title, contact_person_email, alternate_contact_info } = req.body;
-        const query = `UPDATE contacts SET company_id = ?, primary_contact_name = ?, contact_person_job_title = ?, contact_person_email = ?, alternate_contact_info = ? WHERE contact_id = ? AND Deleted = FALSE`;
-        const values = [company_id, primary_contact_name, contact_person_job_title, contact_person_email, alternate_contact_info, req.params.id];
+// /company_details/:id route (PUT)
+router.put('/company_details/:id', function (req, res) {
+    const { id } = req.params;
+    const { industry_type, headquarters_location, additional_office_location, year_founded, company_website, company_description } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Contact updated successfully.' : 'Contact not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE company_details SET industry_type = ?, headquarters_location = ?, additional_office_location = ?, year_founded = ?, company_website = ?, company_description = ? WHERE details_id = ? AND Deleted = FALSE`;
+    db.query(query, [industry_type, headquarters_location, additional_office_location, year_founded, company_website, company_description, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Company details updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Company details not found.' });
+        }
+    });
 });
 
-// 'jobs' table
-router.put('/jobs/:id', async (req, res) => {
-    try {
-        const { title, description, requirements, location, salary_range, employment_type, closing_date, employer_id } = req.body;
-        const query = `UPDATE jobs SET title = ?, description = ?, requirements = ?, location = ?, salary_range = ?, employment_type = ?, closing_date = ?, employer_id = ? WHERE job_id = ? AND Deleted = FALSE`;
-        const values = [title, description, requirements, location, salary_range, employment_type, closing_date, employer_id, req.params.id];
+// /user_contacts/:id route (PUT)
+router.put('/user_contacts/:id', function (req, res) {
+    const { id } = req.params;
+    const { phone_number, location, linkedin_profile, portfolio_link, languages_spoken, work_authorization } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Job updated successfully.' : 'Job not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE user_contacts SET phone_number = ?, location = ?, linkedin_profile = ?, portfolio_link = ?, languages_spoken = ?, work_authorization = ? WHERE contact_id = ? AND Deleted = FALSE`;
+    db.query(query, [phone_number, location, linkedin_profile, portfolio_link, languages_spoken, work_authorization, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'User contact updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'User contact not found.' });
+        }
+    });
 });
 
-// 'applications' table
-router.put('/applications/:id', async (req, res) => {
-    try {
-        const { job_id, user_id, application_date, interview_date, status } = req.body;
-        const query = `UPDATE applications SET job_id = ?, user_id = ?, application_date = ?, interview_date = ?, status = ? WHERE application_id = ? AND Deleted = FALSE`;
-        const values = [job_id, user_id, application_date, interview_date, status, req.params.id];
+// /user_profiles/:id route (PUT)
+router.put('/user_profiles/:id', function (req, res) {
+    const { id } = req.params;
+    const { profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Application updated successfully.' : 'Application not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE user_profiles SET profile_picture = ?, resume_link = ?, experience_level = ?, skills = ?, educational_background = ?, previous_job_titles = ?, certifications = ?, preferred_job_titles = ?, employment_type = ?, desired_salary_range = ?, industry_of_interest = ?, preferred_work_location = ?, availability = ? WHERE user_id = ? AND Deleted = FALSE`;
+    db.query(query, [profile_picture, resume_link, experience_level, skills, educational_background, previous_job_titles, certifications, preferred_job_titles, employment_type, desired_salary_range, industry_of_interest, preferred_work_location, availability, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'User profile updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'User profile not found.' });
+        }
+    });
 });
 
-// 'training_programs' table
-router.put('/training_programs/:id', async (req, res) => {
-    try {
-        const { company_id, training_name, training_provider, contact_email, contact_number } = req.body;
-        const query = `UPDATE training_programs SET company_id = ?, training_name = ?, training_provider = ?, contact_email = ?, contact_number = ? WHERE training_id = ? AND Deleted = FALSE`;
-        const values = [company_id, training_name, training_provider, contact_email, contact_number, req.params.id];
+// /social_media_links/:id route (PUT)
+router.put('/social_media_links/:id', function (req, res) {
+    const { id } = req.params;
+    const { platform_name, profile_url } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Training program updated successfully.' : 'Training program not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE social_media_links SET platform_name = ?, profile_url = ? WHERE link_id = ? AND Deleted = FALSE`;
+    db.query(query, [platform_name, profile_url, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Social media link updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Social media link not found.' });
+        }
+    });
+});
+// /contacts/:id route (PUT)
+router.put('/contacts/:id', function (req, res) {
+    const { id } = req.params;
+    const { company_id, primary_contact_name, contact_person_job_title, contact_person_email, alternate_contact_info } = req.body;
+
+    const query = `UPDATE contacts SET company_id = ?, primary_contact_name = ?, contact_person_job_title = ?, contact_person_email = ?, alternate_contact_info = ? WHERE contact_id = ? AND Deleted = FALSE`;
+    db.query(query, [company_id, primary_contact_name, contact_person_job_title, contact_person_email, alternate_contact_info, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Contact updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Contact not found.' });
+        }
+    });
 });
 
-// 'training_details' table
-router.put('/training_details/:id', async (req, res) => {
-    try {
-        const { training_id, training_description, target_audience, training_objectives, training_duration, mode_of_training, start_date, end_date } = req.body;
-        const query = `UPDATE training_details SET training_id = ?, training_description = ?, target_audience = ?, training_objectives = ?, training_duration = ?, mode_of_training = ?, start_date = ?, end_date = ? WHERE details_id = ? AND Deleted = FALSE`;
-        const values = [training_id, training_description, target_audience, training_objectives, training_duration, mode_of_training, start_date, end_date, req.params.id];
+// /training_logistics/:id route (PUT)
+router.put('/training_logistics/:id', function (req, res) {
+    const { id } = req.params;
+    const { training_id, location, training_schedule, training_fees, prerequisites, registration_deadline, participant_capacity } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Training details updated successfully.' : 'Training details not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE training_logistics SET training_id = ?, location = ?, training_schedule = ?, training_fees = ?, prerequisites = ?, registration_deadline = ?, participant_capacity = ? WHERE logistics_id = ? AND Deleted = FALSE`;
+    db.query(query, [training_id, location, training_schedule, training_fees, prerequisites, registration_deadline, participant_capacity, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Training logistics updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Training logistics not found.' });
+        }
+    });
 });
 
-// 'training_logistics' table
-router.put('/training_logistics/:id', async (req, res) => {
-    try {
-        const { training_id, location, training_schedule, training_fees, prerequisites, registration_deadline, participant_capacity } = req.body;
-        const query = `UPDATE training_logistics SET training_id = ?, location = ?, training_schedule = ?, training_fees = ?, prerequisites = ?, registration_deadline = ?, participant_capacity = ? WHERE logistics_id = ? AND Deleted = FALSE`;
-        const values = [training_id, location, training_schedule, training_fees, prerequisites, registration_deadline, participant_capacity, req.params.id];
+// /training_participation/:id route (PUT)
+router.put('/training_participation/:id', function (req, res) {
+    const { id } = req.params;
+    const { training_id, user_id, registration_process, application_requirements, selection_process, job_market_relevance, career_opportunities, networking_opportunities } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Training logistics updated successfully.' : 'Training logistics not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE training_participation SET training_id = ?, user_id = ?, registration_process = ?, application_requirements = ?, selection_process = ?, job_market_relevance = ?, career_opportunities = ?, networking_opportunities = ? WHERE participation_id = ? AND Deleted = FALSE`;
+    db.query(query, [training_id, user_id, registration_process, application_requirements, selection_process, job_market_relevance, career_opportunities, networking_opportunities, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Training participation updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Training participation not found.' });
+        }
+    });
 });
 
-// 'training_content' table
-router.put('/training_content/:id', async (req, res) => {
-    try {
-        const { training_id, training_modules, resources_provided, certification_offered } = req.body;
-        const query = `UPDATE training_content SET training_id = ?, training_modules = ?, resources_provided = ?, certification_offered = ? WHERE content_id = ? AND Deleted = FALSE`;
-        const values = [training_id, training_modules, resources_provided, certification_offered, req.params.id];
+// /user_news_read/:id route (PUT)
+router.put('/user_news_read/:id', function (req, res) {
+    const { id } = req.params;
+    const { user_id, news_id, is_read, read_date } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Training content updated successfully.' : 'Training content not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE user_news_read SET user_id = ?, news_id = ?, is_read = ?, read_date = ? WHERE user_news_id = ? AND Deleted = FALSE`;
+    db.query(query, [user_id, news_id, is_read, read_date, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'User news read record updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'User news read record not found.' });
+        }
+    });
 });
 
-// 'training_participation' table
-router.put('/training_participation/:id', async (req, res) => {
-    try {
-        const { training_id, user_id, registration_process, application_requirements, selection_process, job_market_relevance, career_opportunities, networking_opportunities } = req.body;
-        const query = `UPDATE training_participation SET training_id = ?, user_id = ?, registration_process = ?, application_requirements = ?, selection_process = ?, job_market_relevance = ?, career_opportunities = ?, networking_opportunities = ? WHERE participation_id = ? AND Deleted = FALSE`;
-        const values = [training_id, user_id, registration_process, application_requirements, selection_process, job_market_relevance, career_opportunities, networking_opportunities, req.params.id];
+// /notifications/:id route (PUT)
+router.put('/notifications/:id', function (req, res) {
+    const { id } = req.params;
+    const { user_id, notification_type, message, is_read } = req.body;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Training participation updated successfully.' : 'Training participation not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
+    const query = `UPDATE notifications SET user_id = ?, notification_type = ?, message = ?, is_read = ? WHERE notification_id = ? AND Deleted = FALSE`;
+    db.query(query, [user_id, notification_type, message, is_read, id], function (err, result) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Notification updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Notification not found.' });
+        }
+    });
 });
 
-// 'training_compliance' table
-router.put('/training_compliance/:id', async (req, res) => {
-    try {
-        const { training_id, consent_and_privacy_policy, terms_and_conditions, promotional_material, sponsorship_details, faq_and_policies } = req.body;
-        const query = `UPDATE training_compliance SET training_id = ?, consent_and_privacy_policy = ?, terms_and_conditions = ?, promotional_material = ?, sponsorship_details = ?, faq_and_policies = ? WHERE compliance_id = ? AND Deleted = FALSE`;
-        const values = [training_id, consent_and_privacy_policy, terms_and_conditions, promotional_material, sponsorship_details, faq_and_policies, req.params.id];
+// Export the router
+module.exports = router;
 
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Training compliance updated successfully.' : 'Training compliance not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-// 'activity_log' table
-router.put('/activity_log/:id', async (req, res) => {
-    try {
-        const { user_id, company_id, table_name, record_id, activity_type, details } = req.body;
-        const query = `UPDATE activity_log SET user_id = ?, company_id = ?, table_name = ?, record_id = ?, activity_type = ?, details = ? WHERE log_id = ? AND Deleted = FALSE`;
-        const values = [user_id, company_id, table_name, record_id, activity_type, details, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Activity log updated successfully.' : 'Activity log not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-// 'notifications' table
-router.put('/notifications/:id', async (req, res) => {
-    try {
-        const { user_id, notification_type, message, is_read } = req.body;
-        const query = `UPDATE notifications SET user_id = ?, notification_type = ?, message = ?, is_read = ? WHERE notification_id = ? AND Deleted = FALSE`;
-        const values = [user_id, notification_type, message, is_read, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Notification updated successfully.' : 'Notification not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-// 'news' table
-router.put('/news/:id', async (req, res) => {
-    try {
-        const { headline, body, link } = req.body;
-        const query = `UPDATE news SET headline = ?, body = ?, link = ? WHERE news_id = ? AND Deleted = FALSE`;
-        const values = [headline, body, link, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'News updated successfully.' : 'News not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-// 'user_news_read' table
-router.put('/user_news_read/:id', async (req, res) => {
-    try {
-        const { user_id, news_id, is_read, read_date } = req.body;
-        const query = `UPDATE user_news_read SET user_id = ?, news_id = ?, is_read = ?, read_date = ? WHERE user_news_id = ? AND Deleted = FALSE`;
-        const values = [user_id, news_id, is_read, read_date, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'User news read record updated successfully.' : 'Record not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-// 'interview_acceptance' table
-router.put('/interview_acceptance/:id', async (req, res) => {
-    try {
-        const { user_id, job_id, interview_date, interview_location, interview_time, interview_status } = req.body;
-        const query = `UPDATE interview_acceptance SET user_id = ?, job_id = ?, interview_date = ?, interview_location = ?, interview_time = ?, interview_status = ? WHERE interview_id = ? AND Deleted = FALSE`;
-        const values = [user_id, job_id, interview_date, interview_location, interview_time, interview_status, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Interview acceptance updated successfully.' : 'Interview acceptance not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
-// 'appointments' table
-router.put('/appointments/:id', async (req, res) => {
-    try {
-        const { user_id, appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason } = req.body;
-        const query = `UPDATE appointments SET user_id = ?, appointment_type = ?, appointment_header = ?, appointment_description = ?, appointment_date = ?, appointment_time = ?, appointment_location = ?, appointment_status = ?, reason = ? WHERE appointment_id = ? AND Deleted = FALSE`;
-        const values = [user_id, appointment_type, appointment_header, appointment_description, appointment_date, appointment_time, appointment_location, appointment_status, reason, req.params.id];
-
-        const [result] = await db.execute(query, values);
-        res.status(result.affectedRows > 0 ? 200 : 404).json({
-            message: result.affectedRows > 0 ? 'Appointment updated successfully.' : 'Appointment not found.',
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-});
-
+// Export the router
 module.exports = router;

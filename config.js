@@ -6,6 +6,7 @@ const dbConfig = mysql.createPool({
     user: process.env.DB_USER,         // Use DB_USER from .env
     password: process.env.DB_PASSWORD, // Use DB_PASSWORD from .env
     database: process.env.DB_NAME,     // Use DB_NAME from .env
+    port: process.env.DB_PORT, // Use DB_PORT from .env
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
