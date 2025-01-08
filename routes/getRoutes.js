@@ -771,7 +771,7 @@ router.get('/user_contacts', function (req, res) {
 // /user_contacts/:id route (Table No. X)
 router.get('/user_contacts/:id', function (req, res) {
     const id = req.params.id;
-    db.query('SELECT * FROM user_contacts WHERE contact_id = ?', [id], function (err, result) {
+    db.query('SELECT * FROM user_contacts WHERE user_id = ?', [id], function (err, result) {
         if (err) {
             console.error(err);
             res.status(500).send('Internal Server Error');
