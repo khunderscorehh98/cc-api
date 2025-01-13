@@ -14,8 +14,8 @@ const getRoutes = require('./routes/getRoutes');
 const putRoutes = require('./routes/putRoutes');
 const deleteRoutes = require('./routes/deleteRoutes');
 const patchRoutes = require('./routes/patchRoutes');
-
 const restoreRoutes = require('./routes/restoreRoutes');
+const authRoutes = require('./routes/authRoutes'); // Import authentication routes
 
 // Register route files
 app.use('/api', postRoutes);  // Handles POST for all resources
@@ -23,9 +23,10 @@ app.use('/api', getRoutes);   // Handles GET for all resources
 app.use('/api', putRoutes);   // Handles PUT for all resources
 app.use('/api', deleteRoutes); // Handles DELETE for all resources
 app.use('/api', patchRoutes);  // Handles PATCH for all resources
-
-// Register restored routes file (optional)
 app.use('/api', restoreRoutes); // Handles RESTORE for all resources
+
+// Register authentication routes
+app.use('/auth', authRoutes); // Handles authentication (register, login, 2FA)
 
 // Define a root route (optional)
 app.get('/', (req, res) => {
