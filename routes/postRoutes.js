@@ -66,23 +66,56 @@ router.post('/jobs', function (req, res) {
 
 // /companies route
 router.post('/companies', function (req, res) {
-    const { company_name, email, password, contact_number, company_logo, tax_registration_number, tax_identification_number, terms_of_service_accepted } = req.body; // Changed from req.params to req.body
+    const companies = req.body; // Expecting an array of company objects
 
-    const query = `INSERT INTO companies (company_name, email, password, contact_number, company_logo, tax_registration_number, tax_identification_number, terms_of_service_accepted) 
-                    VALUES (?,?,?,?,?,?,?,?)`;
+    if (!Array.isArray(companies) || companies.length === 0) {
+        return res.status(400).json({ message: 'Invalid input format or empty array.' });
+    }
 
-    const values = [company_name, email, password, contact_number, company_logo, tax_registration_number, tax_identification_number, terms_of_service_accepted];
+    const query = `INSERT INTO companies (company_name, email, password, contact_number, company_logo, business_registration_number, tax_identification_number, terms_of_service_accepted) VALUES (?,?,?,?,?,?,?,?)`;
 
-    db.query(query, values, (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ message: 'Internal server error.' });
-        }
-        res.status(201).json({
-            message: 'Company created successfully.',
-            company_id: result.insertId
+    const promises = companies.map(company => {
+        const {
+            company_name,
+            email,
+            password,
+            contact_number,
+            company_logo,
+            business_registration_number,
+            tax_identification_number,
+            terms_of_service_accepted
+        } = company;
+
+        const values = [
+            company_name,
+            email,
+            password,
+            contact_number,
+            company_logo,
+            business_registration_number,
+            tax_identification_number,
+            terms_of_service_accepted
+        ];
+
+        return new Promise((resolve, reject) => {
+            db.query(query, values, (err, result) => {
+                if (err) return reject(err);
+                resolve(result.insertId);
+            });
         });
     });
+
+    Promise.all(promises)
+        .then(results => {
+            res.status(201).json({
+                message: 'Companies created successfully.',
+                company_ids: results
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ message: 'Internal server error.' });
+        });
 });
 
 // /company_details route (Fixed missing closing brace)
