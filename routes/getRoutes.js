@@ -2,6 +2,45 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config.js');
 
+router.get('/roles', (req, res) => {
+    db.query('SELECT role_id, role_name FROM roles', (err, results) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+
+router.get('/mods', function (req, res) {
+    db.query('SELECT * FROM mods', function (err, result) {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(result);
+        }
+    });
+})
+
+router.get('/mods/:id', function (req, res) {
+    const id = req.params.id;
+    db.query('SELECT * FROM mods WHERE mod_id =?', [id], function (err, result) {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            if (result.length > 0) {
+                res.json(result);
+            } else {
+                res.status(404).send('Mod not found');
+            }
+        }
+    });
+})
+
 // /activity_log route (Table No. 1)
 router.get('/activity_log', function (req, res) {
     db.query('SELECT * FROM activity_log', function (err, result) {
