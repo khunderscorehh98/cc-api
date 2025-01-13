@@ -2,6 +2,28 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config.js');
 
+router.patch('/mods/:id', (req, res) => {
+    const { id } = req.params; // Moderator ID
+    const { role_id } = req.body; // New role ID
+
+    if (!role_id) {
+        return res.status(400).json({ error: "role_id is required" });
+    }
+
+    const query = 'UPDATE mods SET role_id = ? WHERE mod_id = ?';
+    db.query(query, [role_id, id], (err, results) => {
+        if (err) {
+            console.error("Error updating role:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Moderator not found" });
+        }
+        res.json({ message: "Role updated successfully" });
+    });
+});
+
+
 // /contacts/:id route
 router.patch('/contacts/:id', function (req, res) {
     const { id } = req.params;
